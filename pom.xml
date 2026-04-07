@@ -8,7 +8,7 @@
 		<version>3.5.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>in.bushansirgur</groupId>
+	<groupId>com.ruturajsapare</groupId>
 	<artifactId>cloudshareapi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>cloudshareapi</name>
@@ -72,23 +72,29 @@
 		</dependency>
 	</dependencies>
 
+
 	<build>
 		<plugins>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version> <!-- IMPORTANT -->
 				<configuration>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+							<version>1.18.32</version> <!-- ALSO IMPORTANT -->
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.2.5</version> <!-- IMPORTANT -->
 				<configuration>
 					<excludes>
 						<exclude>
@@ -98,7 +104,7 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
-
 </project>
