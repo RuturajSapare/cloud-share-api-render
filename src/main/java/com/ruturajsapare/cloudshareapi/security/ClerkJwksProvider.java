@@ -3,7 +3,7 @@ package com.ruturajsapare.cloudshareapi.security;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+
 
 import java.math.BigInteger;
 import java.net.URL;
@@ -14,7 +14,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+
 public class ClerkJwksProvider {
 
     @Value("${clerk.jwks-url}")
