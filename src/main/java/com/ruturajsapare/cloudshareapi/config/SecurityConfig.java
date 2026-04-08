@@ -17,29 +17,24 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
 
-                // 🔥 IMPORTANT: attach CORS config to Spring Security
+                // 🔥 attach CORS properly
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(auth -> auth
-                        // 🔥 VERY IMPORTANT (preflight requests)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // ✅ your original rules (UNCHANGED)
                         .requestMatchers(
                                 "/webhooks/**",
                                 "/files/public/**",
                                 "/files/download/**",
                                 "/health"
                         ).permitAll()
-
                         .anyRequest().permitAll()
                 )
 
@@ -50,21 +45,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ CORRECT CORS CONFIG
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://cloud-share-api-s4w2.onrender.com/api/v1.0/"
-
+                "http://localhost:5173"
         ));
 
-        config.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
-        ));
-
+        config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
