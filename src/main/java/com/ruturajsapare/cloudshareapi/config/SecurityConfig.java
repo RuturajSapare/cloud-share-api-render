@@ -1,6 +1,6 @@
-package in.bushansirgur.cloudshareapi.config;
+package com.ruturajsapare.cloudshareapi.config;
 
-import in.bushansirgur.cloudshareapi.security.ClerkJwtAuthFilter;
+import com.ruturajsapare.cloudshareapi.security.ClerkJwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
