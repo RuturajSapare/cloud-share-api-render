@@ -12,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 import java.util.List;
 
@@ -45,25 +46,33 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // VERY IMPORTANT
+        // allow credentials (cookies, auth headers)
         config.setAllowCredentials(true);
 
-        // allow frontend origins
-        config.setAllowedOriginPatterns(List.of(
+        // allow specific frontend origins
+        config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://cloudsharewebapp.onrender.com" // change later if needed
+                "https://cloudsharewebapp.onrender.com"
         ));
 
-        // allow everything (fixes preflight issues)
+        // allow headers and methods
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // optional but useful
+        // expose useful headers
         config.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
         return new CorsFilter(source);
+    }
+
+    // ensure CORS filter runs before Spring Security
+    @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration(CorsFilter corsFilter) {
+        FilterRegistrationBean<CorsFilter> registrationBean = new FilterRegistrationBean<>(corsFilter);
+        registrationBean.setOrder(0); // run first
+        return registrationBean;
     }
 }
