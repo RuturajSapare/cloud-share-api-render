@@ -1,5 +1,6 @@
-package com.ruturajsapare.cloudshareapi.config;
+package in.bushansirgur.cloudshareapi.config;
 
+import in.bushansirgur.cloudshareapi.security.ClerkJwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,10 +10,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 import java.util.List;
 
@@ -21,58 +22,33 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final ClerkJwtAuthFilter clerkJwtAuthFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .cors(Customizer.withDefaults()) // enable CORS
+        httpSecurity.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/webhooks/**",
-                                "/files/public/**",
-                                "/files/download/**",
-                                "/health"
-                        ).permitAll()
-                        .anyRequest().permitAll()
-                )
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
-
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/webhooks/**", "/files/public/**", "/files/download/**", "/health").permitAll().anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(clerkJwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 
     @Bean
     public CorsFilter corsFilter() {
+        return new CorsFilter(corsConfigurationSource());
+    }
+
+    private UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
-        // allow credentials (cookies, auth headers)
+        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
-
-        // allow specific frontend origins
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "https://cloudsharewebapp.onrender.com"
-        ));
-
-        // allow headers and methods
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // expose useful headers
-        config.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
-        return new CorsFilter(source);
-    }
-
-    // ensure CORS filter runs before Spring Security
-    @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistration(CorsFilter corsFilter) {
-        FilterRegistrationBean<CorsFilter> registrationBean = new FilterRegistrationBean<>(corsFilter);
-        registrationBean.setOrder(0); // run first
-        return registrationBean;
+        return source;
     }
 }
+
